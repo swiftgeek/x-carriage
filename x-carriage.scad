@@ -5,6 +5,10 @@
 // Václav 'ax' Hůla <axtheb@gmail.com>
 // http://www.reprap.org/wiki/Prusa_Mendel
 // http://github.com/josefprusa/Prusa3
+// ***********************************
+// Modification by: Swift Geek
+// Inspired by: https://www.thingiverse.com/thing:886421/
+
 
 // ThingDoc entry
 /**
@@ -17,6 +21,7 @@ include <configuration.scad>
 use <bushing.scad>
 // mounting plate
 use <extras/groovemount.scad>
+use <belt-holder.scad>
 
 
 //Use 30 for single extruder, 50 for wades, 80 for dual extruders (moved to config file)
@@ -48,29 +53,14 @@ module x_carriage(){
                     translate([4, -1, 0]) cube_fillet([xaxis_rod_distance + 4, 6, carriage_l], radius=2);
                     translate([-8, -1, 0]) cube_fillet([xaxis_rod_distance + 16, 6, bushing_carriage_len + 3], radius=2);
                 }
+                
 
-                translate([45/2,0,0]){
-
-                    //fill the space where the belt is, as it will be substracted at later point and we want it stiff here.
-                    //belt smooth side
-                    translate([-13.5 - belt_thickness, -8.5, 0]) cube_fillet([5, 15, carriage_l], vertical = [2, 2, 0, 0]);
-                    //belt teethed side, with cutouts for belt ends.
-                    difference(){
-                        union() {
-                            translate([-3, -1, carriage_l/2]) cube_fillet([11, 16, carriage_l], vertical = [2, 2, 0, 0], center = true);
-                            translate([-13, -10, 0]) cube([8, 10, carriage_l]);
-                        }
-                        translate([-3.5, 0, 67 + carriage_hole_to_side]) cube([13, 10, 8], center = true);
-                        translate([-3.5, 0, 40 + carriage_hole_to_side]) cube([13, 10, 8], center = true);
-                        translate([-3.5, 0, 15 + carriage_hole_to_side]) cube([13, 10, 8], center = true);
-                        if (carriage_l_base == 30) {
-                            //more space for belt ends, as there is only one cutout
-                            translate([-3.5, 0, 15 + carriage_hole_to_side]) cube([13, 10, 14], center = true);
-                        }
-                    }
-
-                }
+                translate([45/2+13/2,0,0]){
+                    translate([-2.5, -1, carriage_l/2]) cube_fillet([8+13, 16, carriage_l], vertical = [2, 2, 0, 0], center = true);
+                }             
             }
+            // Remove belt area
+            rotate ([90,90,180]) translate ([-33,-34.7,-5.4]) inverted_holder();
             //Ensure upper bearing can be inserted cleanly
             rotate([0, 0, 90]) {
                 linear_negative(bushing_carriage, carriage_l);
@@ -80,31 +70,27 @@ module x_carriage(){
                 linear_negative(bushing_xy, carriage_l);
             }
             // extruder mounts
-            translate([20, -2, carriage_hole_to_side]) {
+            translate([21, -2, carriage_hole_to_side]) {
                 rotate([90, 0, 0]) cylinder(r=1.8, h=32, center=true,$fn=small_hole_segments);
                 translate([0, 7, 0]) rotate([90, 60, 0]) cylinder(r=3.4, h=5, $fn=6, center=true);
             }
-            translate([20, -2, carriage_hole_to_side + 30]) {
+            translate([21, -2, carriage_hole_to_side + 30]) {
                 rotate([90, 0, 0]) cylinder(r=1.8, h=32, center=true,$fn=small_hole_segments);
                 translate([0, 7, 0]) rotate([90, 60, 0]) cylinder(r=3.4, h=5, $fn=6, center=true);
             }
             if (carriage_l >= 50 + 2 * carriage_hole_to_side) {
-                translate([20, -2, carriage_hole_to_side + 30 + 20]) {
+                translate([21, -2, carriage_hole_to_side + 30 + 20]) {
                     rotate([90, 0, 0]) cylinder(r=1.8, h=32, center=true,$fn=small_hole_segments);
                     translate([0, 7, 0]) rotate([90, 60, 0]) cylinder(r=3.4, h=5, $fn=6, center=true);
                 }
             }
             if (carriage_l >= 80 + 2 * carriage_hole_to_side) {
-                translate([20, -2, carriage_hole_to_side + 30 + 20 + 30]) {
+                translate([21, -2, carriage_hole_to_side + 30 + 20 + 30]) {
                     rotate([90, 0, 0]) cylinder(r=1.8, h=32, center=true,$fn=small_hole_segments);
                     translate([0, 7, 0]) rotate([90, 60, 0]) cylinder(r=3.4, h=5, $fn=6, center=true);
                 }
             }
-            //belt insert
-            translate([-8.5 + 45 / 2, 0, 0]) mirror([1, 0, 0]) {
-                belt(carriage_l, 5);
-                %belt(carriage_l);
-            }
+
         }
     }
 }
